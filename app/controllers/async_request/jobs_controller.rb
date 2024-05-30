@@ -6,7 +6,7 @@ module AsyncRequest
       return render_invalid_token unless valid_token?
       job = Job.find_by(id: token[:job_id])
       return head :not_found if job.blank?
-      job.finished? ? render_finished_job(job) : render_pending
+      job.finished? ? render_finished_job(job) : render_pending(job)
     end
 
     private
@@ -33,8 +33,10 @@ module AsyncRequest
       render json: { errors: [{ message: 'Invalid token' }] }, status: :bad_request
     end
 
-    def render_pending
-      head :accepted
+    def render_pending(job)
+      render json: { status: job.status, response: {
+        status_code: job.status_code, body: job.response || {}
+      } }, status: :accepted
     end
 
     def render_finished_job(job)
