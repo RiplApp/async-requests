@@ -31,6 +31,13 @@ module AsyncRequest
       super
     end
 
+    def report_progress!(response)
+      update!(
+        status_code: map_status_code(:accepted),
+        response: response.to_s
+      )
+    end
+
     def finished?
       processed? || failed?
     end
@@ -40,7 +47,7 @@ module AsyncRequest
       Rails.logger.info(error.message)
       Rails.logger.info(error.backtrace.inspect)
       update!(status: :failed, status_code: 500,
-                         response: { error: error.message }.to_json)
+              response: { error: error.message }.to_json)
     end
 
     private
